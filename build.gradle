@@ -19,16 +19,16 @@ apply plugin: 'docker'
 // end::plugin[]
 
 // This is used as the docker image prefix (org)
-group = 'gregturn'
+group = 'us.gcr.io/nice-plexus-158605'
 
 jar {
-    baseName = 'gs-spring-boot-docker'
-    version =  '0.1.0'
+    baseName = 'meet-spring-boot-docker'
+    version =  '1.0'
 }
 
 // tag::task[]
 task buildDocker(type: Docker, dependsOn: build) {
-  push = true
+  push = false
   applicationName = jar.baseName
   dockerfile = file('src/main/docker/Dockerfile')
   doFirst {
