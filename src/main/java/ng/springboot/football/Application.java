@@ -1,4 +1,4 @@
-package hello;
+package ng.springboot.football;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,7 +11,7 @@ public class Application {
 
     @RequestMapping("/")
     public String home() {
-        return "Hello Docker World: " + System.getProperty("java.version");
+        return "Adiós mundo cruel";
     }
 
     public static void main(String[] args) {
