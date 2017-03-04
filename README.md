@@ -79,8 +79,6 @@ Publicamos la imagen en Container Registry:
 ```
 gcloud docker -- push us.gcr.io/nice-plexus-158605/meet-spring-boot-docker:latest
 ```
-
-- [ ] Buscar cómo listar los push realizados
  
 ### Despliegue
 
@@ -104,3 +102,7 @@ kubectl get service k-meet-sboot
 kubectl delete service k-meet-sboot
 gcloud container clusters delete cluster-sboot
 ```
+
+## TODO
+
+- [ ] Buscar cómo listar los push realizados a Container Registry
