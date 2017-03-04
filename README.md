@@ -102,6 +102,17 @@ Verificar el estado del despliegue:
 kubectl rollout status deployment/k-meet-sboot
 ```
 
+Obtener descripción del despliegue:
+```
+kubectl describe deployments
+```
+
+ó
+
+```
+kubectl describe deployment k-meet-sboot
+```
+
 Para actualizar la imagen del despliegue:
 
 ```
