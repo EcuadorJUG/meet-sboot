@@ -96,6 +96,18 @@ kubectl get service k-meet-sboot
 
 **Es posible que el comando `kubectl get service k-meet-sboot` debamos ejecutarlo varias veces hasta que nos muestre la IP externa**.
 
+Verificar el estado del despliegue:
+
+```
+kubectl rollout status deployment/k-meet-sboot
+```
+
+Para actualizar la imagen del despliegue:
+
+```
+kubectl set image deployment/k-meet-sboot k-meet-sboot=us.gcr.io/nice-plexus-158605/meet-spring-boot-docker:1.0
+```
+
 ## Eliminar el clúster
 
 ```
