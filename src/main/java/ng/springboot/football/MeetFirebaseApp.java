@@ -1,6 +1,8 @@
 package ng.springboot.football;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -26,29 +28,16 @@ public class MeetFirebaseApp {
         FirebaseApp.initializeApp(options);
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
+        listenResults(database);
+    }
+
+    private void listenResults(FirebaseDatabase database) {
         DatabaseReference resultsRef = database.getReference("/results");
 
         resultsRef.addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String previousKey) {
-                    EventResult eventResult = dataSnapshot.getValue(EventResult.class);
-                    System.out.println(eventResult);
-                    System.out.println(dataSnapshot.getKey());
-
-                    DatabaseReference betsRef = database.getReference("/bets").child(dataSnapshot.getKey());
-                    Query winners = betsRef.orderByChild("prediction").equalTo(eventResult.getResult());
-                    winners.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                System.out.println("Winners: " + dataSnapshot.getChildrenCount());
-                                dataSnapshot.getChildren().forEach(c -> System.out.println("winner: " + c.getKey()));
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                System.out.println("The read failed: " + databaseError.getCode());
-                            }
-                        });
+                    handleNewResult(database, dataSnapshot);
                 }
 
                 @Override
@@ -73,41 +62,46 @@ public class MeetFirebaseApp {
             });
     }
 
-    public static class EventResult {
+    private void handleNewResult(FirebaseDatabase database, DataSnapshot dataSnapshot) {
+        EventResult eventResult = dataSnapshot.getValue(EventResult.class);
+        String eventResultKey = dataSnapshot.getKey();
+        // System.out.println("event: " + eventResult);
+        // System.out.println("event key: " + eventResultKey);
 
-        private int resultA;
-        private int resultB;
-        private String result;
+        DatabaseReference betsRef = database.getReference("/bets").child(dataSnapshot.getKey());
+        Query winners = betsRef.orderByChild("prediction").equalTo(eventResult.getResult());
+        winners.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    handleWinners(database, dataSnapshot, eventResult, eventResultKey);
+                }
 
-        private EventResult() {
+                @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    System.out.println("The read failed: " + databaseError.getCode());
+                }
+            });
+    }
 
-        }
+    private void handleWinners(FirebaseDatabase database, DataSnapshot dataSnapshot,
+                               EventResult eventResult, String eventResultKey) {
+        Map<String, BetWinner> winners = new HashMap<String, BetWinner>();
+        dataSnapshot.getChildren().forEach(c -> {
+                Bet bet = c.getValue(Bet.class);
+                // System.out.println("bet: " + bet);
+                // System.out.println("bet key: " + c.getKey());
+                winners.put(c.getKey(), new BetWinner(bet.getName(), bet.getEmail()));
+            });
 
-        public EventResult(int resultA, int resultB, String result) {
-            this.resultA = resultA;
-            this.resultB = resultB;
-            this.result = result;
-        }
+        Map<String, Object> winnersUpdates = new HashMap<String, Object>();
+        winnersUpdates.put("/events/" + eventResultKey + "/status", "finished");
+        winnersUpdates.put("/events/" + eventResultKey + "/winners", dataSnapshot.getChildrenCount());
+        winnersUpdates.put("/events/" + eventResultKey + "/resultA", eventResult.getResultA());
+        winnersUpdates.put("/events/" + eventResultKey + "/resultB", eventResult.getResultB());
+        winnersUpdates.put("/winners/" + eventResultKey, winners);
+        winnersUpdates.put("/results/" + eventResultKey, null);
 
-        public int getResultA() {
-            return resultA;
-        }
-
-        public int getResultB() {
-            return resultB;
-        }
-
-        public String getResult() {
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            return "ng.springboot.football.EventResult { teamA: \"" + resultA + "\""
-                + ", teamB: \"" + resultB + "\""
-                + ", team: \"" + result + "\" }";
-        }
-
+        database.getReference().updateChildren(winnersUpdates);
     }
 
 }
