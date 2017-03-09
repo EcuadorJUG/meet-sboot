@@ -41,6 +41,10 @@ task buildDocker(type: Docker, dependsOn: build) {
 }
 // end::task[]
 
+task showMeCache << {
+  configurations.compile.each {println it}
+}
+
 repositories {
     mavenCentral()
 }
@@ -49,6 +53,8 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile("org.springframework.boot:spring-boot-starter-web")
-    testCompile("org.springframework.boot:spring-boot-starter-test")
+    compile("org.springframework.boot:spring-boot-starter-web:1.5.2.RELEASE")
+    compile('com.google.firebase:firebase-admin:4.1.2')
+    testCompile("org.springframework.boot:spring-boot-starter-test:1.5.2.RELEASE")
 }
+

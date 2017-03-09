@@ -1,2 +1,8 @@
 .gradle
+.classpath
+.project
+pom.xml
 build
+target
+*.xmi
+serviceAccountKey.json

@@ -1,5 +1,7 @@
 package ng.springboot.football;
 
+import java.io.FileNotFoundException;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +18,7 @@ public class Application {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
+        new MeetFirebaseApp().run();
     }
 
 }
