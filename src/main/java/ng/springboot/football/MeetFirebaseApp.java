@@ -31,7 +31,7 @@ public class MeetFirebaseApp {
     }
 
     private void listenResults(FirebaseDatabase database) {
-        DatabaseReference resultsRef = database.getReference("/results");
+        DatabaseReference resultsRef = database.getReference("/server/results");
 
         resultsRef.addChildEventListener(new ChildEventListener() {
                 @Override
@@ -64,8 +64,8 @@ public class MeetFirebaseApp {
     private void handleNewResult(FirebaseDatabase database, DataSnapshot dataSnapshot) {
         EventResult eventResult = dataSnapshot.getValue(EventResult.class);
         String eventResultKey = dataSnapshot.getKey();
-        System.out.println("event: " + eventResult);
-        DatabaseReference betsRef = database.getReference("/bets").child(dataSnapshot.getKey());
+        System.out.println("result: " + eventResult);
+        DatabaseReference betsRef = database.getReference("/public/bets").child(dataSnapshot.getKey());
         Query winners = betsRef.orderByChild("prediction").equalTo(eventResult.getResult());
         winners.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -90,12 +90,16 @@ public class MeetFirebaseApp {
             });
 
         Map<String, Object> winnersUpdates = new HashMap<String, Object>();
-        winnersUpdates.put("/events/" + eventResultKey + "/status", "finished");
-        winnersUpdates.put("/events/" + eventResultKey + "/winners", dataSnapshot.getChildrenCount());
-        winnersUpdates.put("/events/" + eventResultKey + "/resultA", eventResult.getResultA());
-        winnersUpdates.put("/events/" + eventResultKey + "/resultB", eventResult.getResultB());
-        winnersUpdates.put("/winners/" + eventResultKey, winners);
-        winnersUpdates.put("/results/" + eventResultKey, null);
+        winnersUpdates.put("/users/" + eventResult.getOwner() + "/events/" + eventResultKey + "/status", "finished");
+        winnersUpdates.put("/users/" + eventResult.getOwner() + "/events/" + eventResultKey + "/winners", dataSnapshot.getChildrenCount());
+        winnersUpdates.put("/users/" + eventResult.getOwner() + "/events/" + eventResultKey + "/resultA", eventResult.getResultA());
+        winnersUpdates.put("/users/" + eventResult.getOwner() + "/events/" + eventResultKey + "/resultB", eventResult.getResultB());
+        winnersUpdates.put("/public/events/" + eventResultKey + "/status", "finished");
+        winnersUpdates.put("/public/events/" + eventResultKey + "/winners", dataSnapshot.getChildrenCount());
+        winnersUpdates.put("/public/events/" + eventResultKey + "/resultA", eventResult.getResultA());
+        winnersUpdates.put("/public/events/" + eventResultKey + "/resultB", eventResult.getResultB());
+        winnersUpdates.put("/public/winners/" + eventResultKey, winners);
+        winnersUpdates.put("/server/results/" + eventResultKey, null);
         database.getReference().updateChildren(winnersUpdates);
     }
 
