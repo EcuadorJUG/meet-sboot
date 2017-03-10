@@ -18,15 +18,14 @@ import com.google.firebase.database.ValueEventListener;
 public class MeetFirebaseApp {
 
     public void run() {
+        // login
         InputStream serviceAccount = getClass().getResourceAsStream("serviceAccountKey.json");
-
         FirebaseOptions options = new FirebaseOptions.Builder()
             .setCredential(FirebaseCredentials.fromCertificate(serviceAccount))
             .setDatabaseUrl("https://meet-spring-boot.firebaseio.com")
             .build();
-
         FirebaseApp.initializeApp(options);
-
+        // listeners
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         listenResults(database);
     }
@@ -65,9 +64,7 @@ public class MeetFirebaseApp {
     private void handleNewResult(FirebaseDatabase database, DataSnapshot dataSnapshot) {
         EventResult eventResult = dataSnapshot.getValue(EventResult.class);
         String eventResultKey = dataSnapshot.getKey();
-        // System.out.println("event: " + eventResult);
-        // System.out.println("event key: " + eventResultKey);
-
+        System.out.println("event: " + eventResult);
         DatabaseReference betsRef = database.getReference("/bets").child(dataSnapshot.getKey());
         Query winners = betsRef.orderByChild("prediction").equalTo(eventResult.getResult());
         winners.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -88,8 +85,7 @@ public class MeetFirebaseApp {
         Map<String, BetWinner> winners = new HashMap<String, BetWinner>();
         dataSnapshot.getChildren().forEach(c -> {
                 Bet bet = c.getValue(Bet.class);
-                // System.out.println("bet: " + bet);
-                // System.out.println("bet key: " + c.getKey());
+                System.out.println("bet: " + bet);
                 winners.put(c.getKey(), new BetWinner(bet.getName(), bet.getEmail()));
             });
 
@@ -100,7 +96,6 @@ public class MeetFirebaseApp {
         winnersUpdates.put("/events/" + eventResultKey + "/resultB", eventResult.getResultB());
         winnersUpdates.put("/winners/" + eventResultKey, winners);
         winnersUpdates.put("/results/" + eventResultKey, null);
-
         database.getReference().updateChildren(winnersUpdates);
     }
 
